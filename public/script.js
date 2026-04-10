@@ -1,6 +1,11 @@
 /* ============================================================
-   Md Ummar — Portfolio  |  script.js (UPDATED)
+   Md Ummar — Portfolio  |  script.js (FINAL FIXED)
    ============================================================ */
+
+/* ── CONFIG (IMPORTANT) ───────────────────────────────────── */
+const BASE_URL = "https://your-backend-url.com"; 
+// 🔴 CHANGE THIS → your deployed backend URL
+// Example: https://portfolio-backend.onrender.com
 
 /* ── SMOOTH SCROLL ───────────────────────────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -40,7 +45,7 @@ const revealObserver = new IntersectionObserver(entries => {
 
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-/* ── CONTACT FORM (FIXED — SENDS TO BACKEND) ───────────────── */
+/* ── CONTACT FORM (FIXED FOR DEPLOYMENT) ─────────────────── */
 const contactForm = document.getElementById('contactForm');
 const formStatus  = document.getElementById('formStatus');
 
@@ -54,7 +59,7 @@ if (contactForm) {
     const message = document.getElementById('cmsg').value;
 
     try {
-      const res = await fetch("http://localhost:5000/contact", {
+      const res = await fetch(`${BASE_URL}/contact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -74,7 +79,7 @@ if (contactForm) {
         formStatus.classList.add('show');
         contactForm.reset();
       } else {
-        formStatus.textContent = "❌ Failed to send message";
+        formStatus.textContent = data.msg || "❌ Failed to send message";
         formStatus.classList.add('show');
       }
 
@@ -87,6 +92,7 @@ if (contactForm) {
     setTimeout(() => formStatus.classList.remove('show'), 6000);
   });
 }
+
 /* ── CHATBOT ─────────────────────────────────────────────── */
 const fab       = document.getElementById('chat-fab');
 const chatbox   = document.getElementById('chatbox');
@@ -95,19 +101,14 @@ const chatMsgs  = document.getElementById('chat-msgs');
 const chatInput = document.getElementById('chat-input');
 const chatSend  = document.getElementById('chat-send');
 
-// Toggle chatbox
 fab?.addEventListener('click', () => chatbox.classList.toggle('open'));
 closeBtn?.addEventListener('click', () => chatbox.classList.remove('open'));
 
-// Send message
 chatInput?.addEventListener('keydown', e => {
   if (e.key === 'Enter') sendMessage();
 });
 chatSend?.addEventListener('click', sendMessage);
 
-/**
- * Append message to chat UI
- */
 function appendMessage(text, role) {
   const div = document.createElement('div');
   div.className = `cmsg ${role}`;
@@ -117,9 +118,6 @@ function appendMessage(text, role) {
   return div;
 }
 
-/**
- * SEND MESSAGE (FIXED — CONNECTS TO BACKEND)
- */
 async function sendMessage() {
   const text = chatInput.value.trim();
   if (!text) return;
@@ -130,7 +128,7 @@ async function sendMessage() {
   const typingBubble = appendMessage('Thinking…', 'bot typing');
 
   try {
-    const response = await fetch("http://localhost:5000/chat", {
+    const response = await fetch(`${BASE_URL}/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -138,7 +136,6 @@ async function sendMessage() {
       body: JSON.stringify({ message: text })
     });
 
-    // Handle bad response
     if (!response.ok) {
       throw new Error("Server error");
     }
